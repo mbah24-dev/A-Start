@@ -24,9 +24,8 @@ void Unit::update(float dT, Level& level, std::vector<Unit>& listUnits) {
     float distanceMove = speed * dT;
     if (distanceMove > distanceToTarget) //Yes destination atteinte
         distanceMove = distanceToTarget;
-
     // Calcul de la direction de déplacement combinant la direction du champ de flux et de la séparation normale
-    Vector2D directionNormalFlowField(level.getFlowNormal((int)pos.x, (int)pos.y));
+    Vector2D directionNormalFlowField(level.getFlowNormal((int)pos.x, (int)pos.y)); //Recupere la direction de la tuile
     Vector2D directionNormalSeparation(computeNormalSeparation(listUnits));
     Vector2D directionNormalCombined = directionNormalFlowField + directionNormalSeparation * 5.0f;
     directionNormalCombined.normalize();
@@ -50,18 +49,20 @@ void Unit::update(float dT, Level& level, std::vector<Unit>& listUnits) {
     }
 
     // Mise à jour de la position si aucun obstacle rencontré
+    // Mise à jour de la position si aucun obstacle rencontré
     if (moveOk) {
-        const float spacing = 0.35f;
-        int x = (int)(pos.x + posAdd.x + copysign(spacing, posAdd.x));
+        const float spacing = 0.35f; // Marge de sécurité pour éviter les collisions avec les murs
+        int x = (int)(pos.x + posAdd.x + copysign(spacing, posAdd.x)); // Ajustement de la coordonnée x avec la marge de sécurité
         int y = (int)(pos.y);
-        if (posAdd.x != 0.0f && level.isTileWall(x, y) == false)
+        if (posAdd.x != 0.0f && !level.isTileWall(x, y)) // Vérification de collision sur l'axe x
             pos.x += posAdd.x;
 
         x = (int)(pos.x);
-        y = (int)(pos.y + posAdd.y + copysign(spacing, posAdd.y));
-        if (posAdd.y != 0.0f && level.isTileWall(x, y) == false)
+        y = (int)(pos.y + posAdd.y + copysign(spacing, posAdd.y)); // Ajustement de la coordonnée y avec la marge de sécurité
+        if (posAdd.y != 0.0f && !level.isTileWall(x, y)) // Vérification de collision sur l'axe y
             pos.y += posAdd.y;
     }
+
 
     // Calcul de la position de dessin en fonction de la position actuelle
     const float fKeep = 0.93f;
