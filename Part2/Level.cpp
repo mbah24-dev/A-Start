@@ -31,8 +31,9 @@ Level::Level(SDL_Renderer* renderer, int setTileCountX, int setTileCountY) :
 
 void Level::draw(SDL_Renderer* renderer, int tileSize) {
     //Draw the arrow (and empty) tiles.
-    for (int i = 0; i < listTiles.size(); i++)
-        drawTile(renderer, (i % tileCountX), (i / tileCountY), tileSize);
+    for (int y = 0; y < tileCountY; y++)
+        for (int x = 0; x < tileCountX; x++)
+            drawTile(renderer, x, y, tileSize);
 
     //Draw the target tile.
     if (textureTileTarget != nullptr) {
@@ -189,19 +190,19 @@ void Level::calculateDistances() {
 
 
 void Level::calculateFlowDirections() {
-    //The offset of the neighboring tiles to be checked.
-    const int listNeighbors[][2] = {
-        {-1, 0}, {-1, 1}, {0, 1}, {1, 1},
-        {1, 0}, {1, -1}, {0, -1}, {-1, -1} };
+    // The offset of the neighboring tiles to be checked (only horizontal and vertical).
+    const int listNeighbors[][2] = { {-1, 0}, {0, -1}, {0, 1}, {1, 0} };
 
     for (int indexCurrent = 0; indexCurrent < listTiles.size(); indexCurrent++) {
-        //Ensure that the tile has been assigned a distance value.
+        // Ensure that the tile has been assigned a distance value.
         if (listTiles[indexCurrent].flowDistance != flowDistanceMax) {
-            //Set the best distance to the current tile's distance.
+            // Set the best distance to the current tile's distance.
             unsigned char flowFieldBest = listTiles[indexCurrent].flowDistance;
+            int bestDirectionX = 0;
+            int bestDirectionY = 0;
 
-            //Check each of the neighbors;
-            for (int count = 0; count < 8; count++) {
+            // Check each of the neighbors (only horizontal and vertical).
+            for (int count = 0; count < 4; count++) {
                 int offsetX = listNeighbors[count][0];
                 int offsetY = listNeighbors[count][1];
 
@@ -209,24 +210,27 @@ void Level::calculateFlowDirections() {
                 int neighborY = offsetY + indexCurrent / tileCountX;
                 int indexNeighbor = neighborX + neighborY * tileCountX;
 
-                //Ensure that the neighbor exists.
+                // Ensure that the neighbor exists.
                 if (indexNeighbor > -1 && indexNeighbor < listTiles.size() &&
                     neighborX > -1 && neighborX < tileCountX &&
                     neighborY > -1 && neighborY < tileCountY) {
-                    //If the current neighbor's distance is lower than the best then use it.
+                    // If the current neighbor's distance is lower than the best then use it.
                     if (listTiles[indexNeighbor].flowDistance < flowFieldBest) {
                         flowFieldBest = listTiles[indexNeighbor].flowDistance;
-                        listTiles[indexCurrent].flowDirectionX = offsetX;
-                        listTiles[indexCurrent].flowDirectionY = offsetY;
+                        bestDirectionX = offsetX;
+                        bestDirectionY = offsetY;
                     }
                 }
             }
+
+            // Update the flow direction of the current tile to the best horizontal or vertical direction.
+            listTiles[indexCurrent].flowDirectionX = bestDirectionX;
+            listTiles[indexCurrent].flowDirectionY = bestDirectionY;
         }
     }
 }
 
-
-
+//Je recupere la direction de la tuile a la position x, y
 Vector2D Level::getFlowNormal(int x, int y) {
     int index = x + y * tileCountX;
     if (index > -1 && index < listTiles.size() &&
