@@ -3,7 +3,7 @@
 // Constructeur de la classe Game avec par defaut le mode 1(Ajout des murs)
 Game::Game(SDL_Window* window, SDL_Renderer* renderer, int windowWidth, int windowHeight) :
         placementModeCurrent(PlacementMode::wall),
-        level(renderer, windowWidth, windowHeight) {
+        level(renderer, windowWidth-tileSize, windowHeight-tileSize) {
 
     // Initialisation du jeu
     if (window != nullptr && renderer != nullptr) {
@@ -18,8 +18,8 @@ Game::Game(SDL_Window* window, SDL_Renderer* renderer, int windowWidth, int wind
         auto time1 = std::chrono::system_clock::now();
         //auto time2 = std::chrono::system_clock::now();
 
-        // Temps pour chaque frame (60 fps)
-        const float dT = 1.0f / 60.0f;
+        // Temps pour chaque frame (80 fps)
+        const float dT = 1.0f / 80.0f;
 
         // Boucle principale du jeu
         bool running = true;
@@ -115,7 +115,7 @@ void Game::processEvents(SDL_Renderer* renderer, bool& running) {
                         break;
                     case PlacementMode::units:
                         // Ajoute une unité à la position de la souris
-                        // if (mouseDownThisFrame) //Si cette ligne est commenter on aura plusieur Enemy d'un coup
+                        if (mouseDownThisFrame) //Si cette ligne est commenter on aura plusieur Enemy d'un coup
                             addUnit(renderer, posMouse);
                         break;
                 }
@@ -140,7 +140,7 @@ void Game::update(float dT) {
 // Dessine le contenu du jeu
 void Game::draw(SDL_Renderer* renderer) {
     // Efface l'écran
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 57, 51, 82, 0.37);
     SDL_RenderClear(renderer);
 
     // Dessine le niveau
